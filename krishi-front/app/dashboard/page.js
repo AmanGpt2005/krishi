@@ -1,10 +1,8 @@
 // app/dashboard/page.js
 'use client'
-
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CropCard from '../../components/Cropcard'
-
 
 const DISTRICTS = {
   'Andhra Pradesh': [
@@ -92,53 +90,6 @@ const DISTRICTS = {
   Punjab: ['Amritsar', 'Ludhiana', 'Jalandhar', 'Patiala'],
 }
 
-const MOCK_RESULTS = {
-  'Red Soil': {
-    soilType: 'Red Soil',
-    confidence: '98%',
-    marketTrend: 'Consistently strong for Groundnut.',
-    soilMoisture: 'Moderate. Plan for supplementary irrigation.',
-    recommendations: [
-      { name: 'Groundnut', image: 'https://placehold.co/400x250/F4A460/FFFFFF?text=Groundnut', rationale: 'Excellent drainage prevents waterlogging. Strong market price.' },
-      { name: 'Pulses', image: 'https://placehold.co/400x250/8B4513/FFFFFF?text=Pulses', rationale: 'Well-suited for red soil and improves soil fertility.' },
-      { name: 'Millets (Ragi)', image: 'https://placehold.co/400x250/CD853F/FFFFFF?text=Ragi', rationale: 'Drought-resistant and grows well in nutrient-poor soil.' },
-    ],
-  },
-  'Black Soil': {
-    soilType: 'Black Soil',
-    confidence: '95%',
-    marketTrend: 'Stable for Cotton and Soybean.',
-    soilMoisture: 'High moisture retention, good for rainfed crops.',
-    recommendations: [
-      { name: 'Cotton', image: 'https://placehold.co/400x250/F5F5DC/000000?text=Cotton', rationale: 'High moisture retention is critical for cotton cultivation.' },
-      { name: 'Soybean', image: 'https://placehold.co/400x250/9ACD32/FFFFFF?text=Soybean', rationale: 'Thrives in black soil and has high market demand.' },
-      { name: 'Sugarcane', image: 'https://placehold.co/400x250/3CB371/FFFFFF?text=Sugarcane', rationale: 'Requires high moisture, which black soil provides.' },
-    ],
-  },
-  'Alluvial Soil': {
-    soilType: 'Alluvial Soil',
-    confidence: '97%',
-    marketTrend: 'Strong demand for staple food grains.',
-    soilMoisture: 'Good water retention, supports multiple irrigation cycles.',
-    recommendations: [
-      { name: 'Rice', image: 'https://placehold.co/400x250/F0E68C/000000?text=Rice', rationale: 'High fertility and water retention are ideal for rice paddies.' },
-      { name: 'Wheat', image: 'https://placehold.co/400x250/DEB887/FFFFFF?text=Wheat', rationale: 'Loamy texture and balanced pH are perfect for wheat.' },
-      { name: 'Maize', image: 'https://placehold.co/400x250/FFD700/000000?text=Maize', rationale: 'Benefits from the rich potash in alluvial soil.' },
-    ],
-  },
-  'Laterite Soil': {
-    soilType: 'Laterite Soil',
-    confidence: '94%',
-    marketTrend: 'Excellent for high-value plantation crops.',
-    soilMoisture: 'Good drainage, requires careful water management.',
-    recommendations: [
-      { name: 'Tea', image: 'https://placehold.co/400x250/006400/FFFFFF?text=Tea', rationale: 'Thrives in acidic, well-drained soil conditions.' },
-      { name: 'Coffee', image: 'https://placehold.co/400x250/6f4e37/FFFFFF?text=Coffee', rationale: 'Perfect for plantation on hilly slopes with laterite soil.' },
-      { name: 'Cashew Nuts', image: 'https://placehold.co/400x250/d2b48c/000000?text=Cashew', rationale: 'Adapts well to laterite soil, a profitable choice.' },
-    ],
-  },
-}
-
 export default function DashboardPage() {
   const router = useRouter()
 
@@ -165,20 +116,34 @@ export default function DashboardPage() {
     setPreview(URL.createObjectURL(f))
   }
 
-  const analyze = () => {
+  const analyze = async () => {
     if (!state || !district || !file) {
       alert('Please select a location and upload a soil image.')
       return
     }
+
     setLoading(true)
     setResult(null)
 
-    setTimeout(() => {
-      const keys = Object.keys(MOCK_RESULTS)
-      const randKey = keys[Math.floor(Math.random() * keys.length)]
-      setResult(MOCK_RESULTS[randKey])
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const res = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error("Prediction failed")
+      const data = await res.json()
+
+      setResult(data)   // 👈 Now your real model response is shown
+    } catch (err) {
+      console.error(err)
+      alert("Something went wrong. Please try again.")
+    } finally {
       setLoading(false)
-    }, 1500)
+    }
   }
 
   const logout = () => {
