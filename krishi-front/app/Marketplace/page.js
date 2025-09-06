@@ -24,7 +24,7 @@ export default function Marketplace() {
           🌾 Farmer&apos;s Marketplace
         </h1>
         <p className="text-lg text-green-800 mt-3 max-w-2xl mx-auto">
-          Sell and buy fresh crops directly from farmers – transparent, fair, and sustainable.
+          Sell and buy fresh crops directly from farmers - transparent, fair, and sustainable.
         </p>
       </div>
 
