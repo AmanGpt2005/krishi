@@ -230,6 +230,7 @@ export default function DashboardPage() {
             {preview && (
               <div className="mt-4 text-center lg:mt-0">
                 <img src={preview} alt="Image Preview" className="max-h-80 w-auto mx-auto rounded-lg shadow-md" />
+
               </div>
             )}
           </div>
